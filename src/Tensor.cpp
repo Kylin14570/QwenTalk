@@ -11,7 +11,7 @@ Tensor::Tensor()
     Tshape.height  = 1;
     Tshape.width   = 1;
     Tsize = 1;
-    Tbuf = (float *)malloc(Tsize * sizeof(float));
+    Tbuf.reset(new Buffer(Tsize * sizeof(float)));
 }
 
 Tensor::Tensor(int W)
@@ -23,7 +23,7 @@ Tensor::Tensor(int W)
     Tshape.height  = 1;
     Tshape.width   = W;
     Tsize = W;
-    Tbuf = (float *)malloc(Tsize * sizeof(float));
+    Tbuf.reset(new Buffer(Tsize * sizeof(float)));
 }
 
 Tensor::Tensor(int H, int W)
@@ -35,7 +35,7 @@ Tensor::Tensor(int H, int W)
     Tshape.height  = H;
     Tshape.width   = W;
     Tsize = H * W;
-    Tbuf = (float *)malloc(Tsize * sizeof(float));
+    Tbuf.reset(new Buffer(Tsize * sizeof(float)));
 }
 
 Tensor::Tensor(int C, int H, int W)
@@ -47,7 +47,7 @@ Tensor::Tensor(int C, int H, int W)
     Tshape.height  = H;
     Tshape.width   = W;
     Tsize = C * H * W;
-    Tbuf = (float *)malloc(Tsize * sizeof(float));
+    Tbuf.reset(new Buffer(Tsize * sizeof(float)));
 }
 
 Tensor::Tensor(int N, int C, int H, int W)
@@ -59,7 +59,7 @@ Tensor::Tensor(int N, int C, int H, int W)
     Tshape.height  = H;
     Tshape.width   = W;
     Tsize = N * C * H * W;
-    Tbuf = (float *)malloc(Tsize * sizeof(float));
+    Tbuf.reset(new Buffer(Tsize * sizeof(float)));
 }
 
 Tensor::Tensor(Shape _shape)
@@ -71,14 +71,12 @@ Tensor::Tensor(Shape _shape)
     dim = 4;
     Tshape = _shape;
     Tsize = Tshape.batch * Tshape.channel * Tshape.height * Tshape.width;
-    Tbuf = (float *)malloc(Tsize * sizeof(float));
+    Tbuf.reset(new Buffer(Tsize * sizeof(float)));
 }
 
 Tensor::~Tensor()
 {
-    if (Tbuf) {
-        free(Tbuf);
-    }
+    Tbuf.reset();
     Tsize = 0;
 }
 
@@ -87,8 +85,7 @@ Tensor::Tensor(const Tensor & src)
     this->Tshape = src.Tshape;
     this->Tsize = src.Tsize;
     this->dim = src.dim;
-    this->Tbuf = (float *)malloc(Tsize * sizeof(float));
-    memcpy(this->Tbuf, src.Tbuf, Tsize * sizeof(float));
+    this->Tbuf = src.Tbuf;
 }
 
 Tensor & Tensor::operator= (const Tensor & src)
@@ -96,20 +93,16 @@ Tensor & Tensor::operator= (const Tensor & src)
     if (&src == this) {
         return *this;
     }
-    if (this->Tbuf) {
-        free(this->Tbuf);
-    }
     this->Tshape = src.Tshape;
     this->Tsize = src.Tsize;
     this->dim = src.dim;
-    this->Tbuf = (float *)malloc(Tsize * sizeof(float));
-    memcpy(this->Tbuf, src.Tbuf, Tsize * sizeof(float));
+    this->Tbuf = src.Tbuf;
     return *this;
 }
 
 float * Tensor::host()
 {
-    return Tbuf;
+    return (float *)Tbuf->addr();
 }
 
 Shape Tensor::shape()
@@ -120,14 +113,14 @@ Shape Tensor::shape()
 float & Tensor::at(int i)
 {
     assert(dim == 1);
-    return Tbuf[i];
+    return host()[i];
 }
 
 float & Tensor::at(int i, int j)
 {
     assert(dim == 2);
     int W = Tshape.width;
-    return Tbuf[i * W + j];
+    return host()[i * W + j];
 }
 
 float & Tensor::at(int i, int j, int k)
@@ -135,7 +128,7 @@ float & Tensor::at(int i, int j, int k)
     assert(dim == 3);
     int H = Tshape.height;
     int W = Tshape.width;
-    return Tbuf[i * H * W + j * W + k];
+    return host()[i * H * W + j * W + k];
 }
 
 float & Tensor::at(int i, int j, int k, int s)
@@ -144,28 +137,58 @@ float & Tensor::at(int i, int j, int k, int s)
     int C = Tshape.channel;
     int H = Tshape.height;
     int W = Tshape.width;
-    return Tbuf[i * C * H * W + j * H * W + k * W + s];
+    return host()[i * C * H * W + j * H * W + k * W + s];
 }
 
 void Tensor::print()
 {
     if (dim == 0) {
-        printf("%f\n", Tbuf[0]);
+        printf("%f\n", host()[0]);
     }
     else if (dim == 1) {
-        printf("[");
-        for (int i = 0; i < Tshape.width; i++)
-            printf("%f%s", Tbuf[i], (i < Tshape.width - 1) ? ", " : "]\n");
+        printf("(");
+        for (int i = 0; i < Tshape.width; i++) {
+            printf("%f", at(i));
+            if (i < Tshape.width - 1)
+                printf(", ");
+        }
+        printf(")\n");
     }
     else if (dim == 2) {
+        printf("[");
         for (int i = 0; i < Tshape.height; i++) {
-            printf("[");
-            for (int j = 0; j < Tshape.width; j++)
-                printf("%f%s", at(i, j), (j < Tshape.width - 1) ? ", " : "]\n");
+            printf("(");
+            for (int j = 0; j < Tshape.width; j++) {
+                printf("%f", at(i, j));
+                if (j < Tshape.width - 1)
+                    printf(", ");
+            }
+            printf(")");
+            if (i < Tshape.height - 1)
+                printf(", ");
         }
+        printf("]\n");
     }
     else if (dim == 3) {
-        printf("TODO\n");
+        printf("{");
+        for (int i = 0; i < Tshape.channel; i++) {
+            printf("[");
+            for (int j = 0; j < Tshape.height; j++) {
+                printf("(");
+                for (int k = 0; k < Tshape.width; k++) {
+                    printf("%f", at(i, j, k));
+                    if (k < Tshape.width - 1)
+                        printf(", ");
+                }
+                printf(")");
+                if (j < Tshape.height - 1)
+                    printf(", ");
+            }
+            printf("]");
+            if (i < Tshape.channel - 1)
+                printf(", ");
+        }
+        printf("}\n");
     }
     else {
         printf("TODO\n");

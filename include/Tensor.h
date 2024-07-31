@@ -3,6 +3,9 @@
 
 #include <cstddef>
 #include <cassert>
+#include <memory>
+#include "Buffer.h"
+#include "Malloc.h"
 
 struct Shape {
     int batch;
@@ -16,7 +19,7 @@ class Tensor {
         int dim;
         Shape Tshape;
         size_t Tsize;
-        float * Tbuf = NULL;
+        std::shared_ptr<Buffer> Tbuf;
     public:
         Tensor();
         Tensor(int W);
