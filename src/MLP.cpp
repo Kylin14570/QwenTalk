@@ -21,5 +21,6 @@ void MLP::load(Loader * loader, size_t offset)
 
 Tensor MLP::forward(Tensor input)
 {
+
     return input;
 }

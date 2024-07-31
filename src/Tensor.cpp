@@ -204,3 +204,45 @@ void Tensor::print()
         printf("TODO\n");
     }
 }
+
+Tensor & Tensor::add(const Tensor & tadd)
+{
+    bool shapeSame = true;
+    shapeSame = shapeSame && (this->Tdim == tadd.Tdim);
+    shapeSame = shapeSame && (this->Tshape.batch == tadd.Tshape.batch);
+    shapeSame = shapeSame && (this->Tshape.channel == tadd.Tshape.channel);
+    shapeSame = shapeSame && (this->Tshape.height == tadd.Tshape.height);
+    shapeSame = shapeSame && (this->Tshape.width == tadd.Tshape.width);
+    if (!shapeSame) {
+        PRINT_ERROR("Cannot add tensors with different shapes!\n");
+        return *this;
+    }
+    float * p1 = (float *)this->Tbuf->addr();
+    float * p2 = (float *)tadd.Tbuf->addr();
+    for (int i = 0; i < this->Tsize; i++) {
+        p1[i] += p2[i];
+    }
+    return *this;
+}
+
+Tensor Tensor::operator+ (const Tensor & tadd)
+{
+    bool shapeSame = true;
+    shapeSame = shapeSame && (this->Tdim == tadd.Tdim);
+    shapeSame = shapeSame && (this->Tshape.batch == tadd.Tshape.batch);
+    shapeSame = shapeSame && (this->Tshape.channel == tadd.Tshape.channel);
+    shapeSame = shapeSame && (this->Tshape.height == tadd.Tshape.height);
+    shapeSame = shapeSame && (this->Tshape.width == tadd.Tshape.width);
+    if (!shapeSame) {
+        PRINT_ERROR("Cannot add tensors with different shapes!\n");
+        return *this;
+    }
+    Tensor sumT(this->shape());
+    float * ps = (float *)sumT.Tbuf->addr();
+    float * p1 = (float *)this->Tbuf->addr();
+    float * p2 = (float *)tadd.Tbuf->addr();
+    for (int i = 0; i < this->Tsize; i++) {
+        ps[i] = p1[i] + p2[i];
+    }
+    return sumT;
+}

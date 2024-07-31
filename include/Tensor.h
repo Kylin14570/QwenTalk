@@ -27,9 +27,10 @@ class Tensor {
         Tensor(int C, int H, int W);
         Tensor(int N, int C, int H, int W);
         Tensor(Shape _shape);
-        ~Tensor();
         Tensor(const Tensor & src);
+        ~Tensor();
         Tensor & operator= (const Tensor & src);
+        Tensor operator+ (const Tensor & tadd);
         char * host();
         size_t size();
         int dim();
@@ -39,6 +40,7 @@ class Tensor {
         float & at(int i, int j, int k);
         float & at(int i, int j, int k, int s);
         void print();
+        Tensor & add(const Tensor & tadd);
 };
 
 #endif
