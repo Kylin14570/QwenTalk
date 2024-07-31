@@ -8,6 +8,7 @@
 #include "Attention.h"
 #include "Linear.h"
 #include "MLP.h"
+#include "Loader.h"
 
 class Layer {
     private:

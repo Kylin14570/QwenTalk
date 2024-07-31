@@ -5,26 +5,25 @@
 #include "BF16.h"
 #include "Tensor.h"
 #include "Loader.h"
-int main()
+#include "Model.h"
+
+int main(int argc, char * argv[])
 {
-    std::shared_ptr<Loader> loader(new Loader(ModelPath));
-    std::shared_ptr<Tensor> embeds(new Tensor(VocabSize, HiddenSize));
-    std::shared_ptr<Tensor> norm_weight(new Tensor(HiddenSize));
-    printf("Start to load token embeds ...\n");
-    size_t bytes = loader->load_embed(embeds.get());
-    printf("%lu bytes have been read\n", bytes);
-    printf("Done!\n");
-    for (int i = 0; i < NumLayer; i++) {
-        printf("Start to load layer %d ...\n", i);
-        std::shared_ptr<Layer> layer(new Layer);
-        bytes = loader->load_layer(layer.get(), i);
-        printf("%lu bytes have been read\n", bytes);
-        printf("Done!\n");
+    if (argc != 2) {
+        printf("Usage: %s [Model File Path]\n", argv[0]);
+        return 0;
     }
-    printf("Start to load norm weight ...\n");
-    bytes = loader->load_norm(norm_weight.get());
-    printf("%lu bytes have been read\n", bytes);
-    printf("Done!\n");
-    printf("Finished successfully!\n");
+    Model::ModelConfig config;
+    config.head_dim = HeadDim;
+    config.hidden_size = HiddenSize;
+    config.intermediate_size = InterSize;
+    config.num_head = NumHead;
+    config.num_kvhead = NumKvHead;
+    config.num_layer = NumLayer;
+    config.rms_eps = RMS_EPS;
+    config.vocabulary_size = VocabSize;
+    Model * model = new Model(config);
+    model->load(argv[1]);
+    delete model;
     return 0;
 }
