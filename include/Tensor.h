@@ -16,7 +16,7 @@ struct Shape {
 
 class Tensor {
     private:
-        int dim;
+        int Tdim;
         Shape Tshape;
         size_t Tsize;
         std::shared_ptr<Buffer> Tbuf;
@@ -30,7 +30,9 @@ class Tensor {
         ~Tensor();
         Tensor(const Tensor & src);
         Tensor & operator= (const Tensor & src);
-        float * host();
+        char * host();
+        size_t size();
+        int dim();
         Shape shape();
         float & at(int i);
         float & at(int i, int j);

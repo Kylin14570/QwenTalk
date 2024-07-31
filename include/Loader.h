@@ -17,6 +17,7 @@ class Loader {
         size_t load_embed(Tensor * tensor);
         size_t load_layer(Layer * layer, int k);
         size_t load_norm(Tensor * tensor);
+        size_t load(size_t offset, Tensor * tensor);
 };
 
 #endif

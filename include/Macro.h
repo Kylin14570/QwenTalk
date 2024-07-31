@@ -1,6 +1,8 @@
 #ifndef MACRO_H
 #define MACRO_H
 
+#include <cstdio>
+
 #define NumLayer    28UL
 #define NumHead     12UL
 #define NumKvHead   2UL
