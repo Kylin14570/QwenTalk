@@ -31,6 +31,8 @@ class Tensor {
         ~Tensor();
         Tensor & operator= (const Tensor & src);
         Tensor operator+ (const Tensor & tadd);
+        Tensor operator- (const Tensor & tsub);
+        Tensor operator* (const Tensor & tmul);
         char * host();
         size_t size();
         int dim();
@@ -40,7 +42,6 @@ class Tensor {
         float & at(int i, int j, int k);
         float & at(int i, int j, int k, int s);
         void print();
-        Tensor & add(const Tensor & tadd);
 };
 
 #endif

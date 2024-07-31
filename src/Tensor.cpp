@@ -205,26 +205,6 @@ void Tensor::print()
     }
 }
 
-Tensor & Tensor::add(const Tensor & tadd)
-{
-    bool shapeSame = true;
-    shapeSame = shapeSame && (this->Tdim == tadd.Tdim);
-    shapeSame = shapeSame && (this->Tshape.batch == tadd.Tshape.batch);
-    shapeSame = shapeSame && (this->Tshape.channel == tadd.Tshape.channel);
-    shapeSame = shapeSame && (this->Tshape.height == tadd.Tshape.height);
-    shapeSame = shapeSame && (this->Tshape.width == tadd.Tshape.width);
-    if (!shapeSame) {
-        PRINT_ERROR("Cannot add tensors with different shapes!\n");
-        return *this;
-    }
-    float * p1 = (float *)this->Tbuf->addr();
-    float * p2 = (float *)tadd.Tbuf->addr();
-    for (int i = 0; i < this->Tsize; i++) {
-        p1[i] += p2[i];
-    }
-    return *this;
-}
-
 Tensor Tensor::operator+ (const Tensor & tadd)
 {
     bool shapeSame = true;
@@ -245,4 +225,48 @@ Tensor Tensor::operator+ (const Tensor & tadd)
         ps[i] = p1[i] + p2[i];
     }
     return sumT;
+}
+
+Tensor Tensor::operator- (const Tensor & tsub)
+{
+    bool shapeSame = true;
+    shapeSame = shapeSame && (this->Tdim == tsub.Tdim);
+    shapeSame = shapeSame && (this->Tshape.batch == tsub.Tshape.batch);
+    shapeSame = shapeSame && (this->Tshape.channel == tsub.Tshape.channel);
+    shapeSame = shapeSame && (this->Tshape.height == tsub.Tshape.height);
+    shapeSame = shapeSame && (this->Tshape.width == tsub.Tshape.width);
+    if (!shapeSame) {
+        PRINT_ERROR("Cannot add tensors with different shapes!\n");
+        return *this;
+    }
+    Tensor dif(this->shape());
+    float * ps = (float *)dif.Tbuf->addr();
+    float * p1 = (float *)this->Tbuf->addr();
+    float * p2 = (float *)tsub.Tbuf->addr();
+    for (int i = 0; i < this->Tsize; i++) {
+        ps[i] = p1[i] - p2[i];
+    }
+    return dif;
+}
+
+Tensor Tensor::operator* (const Tensor & tmul)
+{
+    bool shapeSame = true;
+    shapeSame = shapeSame && (this->Tdim == tmul.Tdim);
+    shapeSame = shapeSame && (this->Tshape.batch == tmul.Tshape.batch);
+    shapeSame = shapeSame && (this->Tshape.channel == tmul.Tshape.channel);
+    shapeSame = shapeSame && (this->Tshape.height == tmul.Tshape.height);
+    shapeSame = shapeSame && (this->Tshape.width == tmul.Tshape.width);
+    if (!shapeSame) {
+        PRINT_ERROR("Cannot add tensors with different shapes!\n");
+        return *this;
+    }
+    Tensor prod(this->shape());
+    float * ps = (float *)prod.Tbuf->addr();
+    float * p1 = (float *)this->Tbuf->addr();
+    float * p2 = (float *)tmul.Tbuf->addr();
+    for (int i = 0; i < this->Tsize; i++) {
+        ps[i] = p1[i] * p2[i];
+    }
+    return prod;
 }

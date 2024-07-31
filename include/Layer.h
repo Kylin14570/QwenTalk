@@ -4,61 +4,32 @@
 #include <memory>
 #include "Macro.h"
 #include "Tensor.h"
+#include "Norm.h"
+#include "Attention.h"
+#include "Linear.h"
+#include "MLP.h"
 
 class Layer {
     private:
-        std::shared_ptr<Tensor> preNorm;
-        std::shared_ptr<Tensor> postNorm;
-        std::shared_ptr<Tensor> mlpGate;
-        std::shared_ptr<Tensor> mlpUp;
-        std::shared_ptr<Tensor> mlpDown;
-        std::shared_ptr<Tensor> queryWeight;
-        std::shared_ptr<Tensor> queryBias;
-        std::shared_ptr<Tensor> keyWeight;
-        std::shared_ptr<Tensor> keyBias;
-        std::shared_ptr<Tensor> valueWeight;
-        std::shared_ptr<Tensor> valueBias;
-        std::shared_ptr<Tensor> outputLinear;
+        int layerID;
+        int hidden_size;
+        int intermediate_size;
+        int num_head;
+        int num_kvhead;
+        int head_dim;
+        std::shared_ptr<Norm> input_layer_norm;
+        std::shared_ptr<Linear> query_linear;
+        std::shared_ptr<Linear> key_linear;
+        std::shared_ptr<Linear> value_linear;
+        std::shared_ptr<Attention> attention;
+        std::shared_ptr<Linear> post_attention_linear;
+        std::shared_ptr<Norm> post_attention__norm;
+        std::shared_ptr<MLP> mlp;
     public:
-        Layer();
+        Layer(int id, int hiddenSize, int interSize, int numHead, int numKVhead, int headDim);
         ~Layer() = default;
-        Tensor * input_layernorm() {
-            return preNorm.get();
-        }
-        Tensor * post_attention_layernorm() {
-            return postNorm.get();
-        }
-        Tensor * mlp_gate() {
-            return mlpGate.get();
-        }
-        Tensor * mlp_up() {
-            return mlpUp.get();
-        }
-        Tensor * mlp_down() {
-            return mlpDown.get();
-        }
-        Tensor * query_weight() {
-            return queryWeight.get();
-        }
-        Tensor * query_bias() {
-            return queryBias.get();
-        }
-        Tensor * key_weight() {
-            return keyWeight.get();
-        }
-        Tensor * key_bias() {
-            return keyBias.get();
-        }
-        Tensor * value_weight() {
-            return valueWeight.get();
-        }
-        Tensor * value_bias() {
-            return valueBias.get();
-        }
-        Tensor * attention_out_linear() {
-            return outputLinear.get();
-        }
-        
+        void load(Loader * loader, size_t offset);
+        Tensor forward(Tensor input);
 };
 
 #endif

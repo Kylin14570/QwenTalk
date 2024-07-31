@@ -1,8 +1,8 @@
 #include "MLP.h"
+#include "Silu.h"
 
-MLP::MLP(int lid, int hs, int is)
+MLP::MLP(int hs, int is)
 {
-    layerID = lid;
     hidden_size = hs;
     intermediate_size = is;
     up.reset(new Linear(intermediate_size, hidden_size, false));
@@ -21,6 +21,7 @@ void MLP::load(Loader * loader, size_t offset)
 
 Tensor MLP::forward(Tensor input)
 {
-
-    return input;
+    Tensor t1 = Silu::activate(gate->forward(input));
+    Tensor t2 = up->forward(input);
+    return down->forward(t1 * t2);
 }
