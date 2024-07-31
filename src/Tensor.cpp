@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include "Tensor.h"
 
 Tensor::Tensor()
@@ -79,6 +80,31 @@ Tensor::~Tensor()
         free(Tbuf);
     }
     Tsize = 0;
+}
+
+Tensor::Tensor(const Tensor & src)
+{
+    this->Tshape = src.Tshape;
+    this->Tsize = src.Tsize;
+    this->dim = src.dim;
+    this->Tbuf = (float *)malloc(Tsize * sizeof(float));
+    memcpy(this->Tbuf, src.Tbuf, Tsize * sizeof(float));
+}
+
+Tensor & Tensor::operator= (const Tensor & src)
+{
+    if (&src == this) {
+        return *this;
+    }
+    if (this->Tbuf) {
+        free(this->Tbuf);
+    }
+    this->Tshape = src.Tshape;
+    this->Tsize = src.Tsize;
+    this->dim = src.dim;
+    this->Tbuf = (float *)malloc(Tsize * sizeof(float));
+    memcpy(this->Tbuf, src.Tbuf, Tsize * sizeof(float));
+    return *this;
 }
 
 float * Tensor::host()

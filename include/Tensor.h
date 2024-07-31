@@ -16,7 +16,7 @@ class Tensor {
         int dim;
         Shape Tshape;
         size_t Tsize;
-        float * Tbuf;
+        float * Tbuf = NULL;
     public:
         Tensor();
         Tensor(int W);
@@ -25,6 +25,8 @@ class Tensor {
         Tensor(int N, int C, int H, int W);
         Tensor(Shape _shape);
         ~Tensor();
+        Tensor(const Tensor & src);
+        Tensor & operator= (const Tensor & src);
         float * host();
         Shape shape();
         float & at(int i);

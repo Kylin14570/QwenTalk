@@ -15,8 +15,3 @@ Layer::Layer()
     valueBias.reset(new Tensor(NumKvHead * HeadDim));
     outputLinear.reset(new Tensor(NumKvHead * HeadDim, HiddenSize));
 }
-
-Layer::~Layer()
-{
-    
-}
